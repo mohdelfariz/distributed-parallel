@@ -5,13 +5,13 @@ import json
 from flask import Flask, request
 import requests
 
-
-
 class Block:
 
-    def __init__(self, index, transactions, timestamp, previous_hash, nonce=0):
+    # Constructor for each block
+    def __init__(self, index, transactions, data, timestamp, previous_hash, nonce=0):
         self.index = index
         self.transactions = transactions
+        self.data = data
         self.timestamp = timestamp
         self.previous_hash = previous_hash
         self.nonce = nonce
@@ -20,16 +20,16 @@ class Block:
         block_string = json.dumps(self.__dict__, sort_keys=True)
         return sha256(block_string.encode()).hexdigest()
 
-
 class Blockchain():
 
+    # Constructor for the blockchain
     def __init__(self):
         self.unconfirmed_transactions = []
         self.chain = []
         self.create_genesis_block()
 
     def create_genesis_block(self):
-        genesis_block = Block(0, [], time.time(), "0")
+        genesis_block = Block(0, [], "Genesis Block", time.time(), "0")
         genesis_block.hash = genesis_block.compute_hash()
         self.chain.append(genesis_block)
 
@@ -75,6 +75,7 @@ class Blockchain():
         last_block = self.last_block
         new_block = Block(index=last_block.index + 1, 
                         transactions=self.unconfirmed_transactions,
+                        data="Any data",
                         timestamp=time.time(),
                         previous_hash=last_block.hash)
 
@@ -83,10 +84,8 @@ class Blockchain():
         self.unconfirmed_transactions = []
         return new_block.index
 
-
 app = Flask(__name__)
 blockchain = Blockchain()
-
 
 @app.route('/chain', methods=['GET'])
     
